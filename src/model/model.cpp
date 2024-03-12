@@ -4,6 +4,7 @@
 
 #include "model.h"
 #include "regressor.h"
+#include <TensorFlowLite_ESP32.h>
 
 Eloquent::ML::Port::RandomForestRegressor regressor;
 
@@ -20,7 +21,6 @@ int estimateOccupancy(ModelType modelType, int numValidDevices, int numRandomDev
 
     switch(modelType) {
         case NEURAL_NET:
-            break;
         case REGRESSION:
         default:
             float X[2 + RSSI_BINS + RSSI_BINS];
@@ -37,4 +37,24 @@ int estimateOccupancy(ModelType modelType, int numValidDevices, int numRandomDev
     }
 
     return -1;
+}
+
+
+// Function to calculate RMSE
+float calculateRMSE(float predicted[], float actual[], int size) {
+    float sumError = 0;
+    for(int i = 0; i < size; i++) {
+        float diff = predicted[i] - actual[i];
+        sumError += diff * diff;
+    }
+    return sqrt(sumError / size);
+}
+
+// Function to calculate MAE
+float calculateMAE(float predicted[], float actual[], int size) {
+    float sumError = 0;
+    for(int i = 0; i < size; i++) {
+        sumError += abs(predicted[i] - actual[i]);
+    }
+    return sumError / size;
 }

@@ -8,9 +8,8 @@
 #include "main.h"
 #include "timing.h"
 #include "wifi_sniffing.h"
-#include <ArduinoJson.h>
 #include "model.h"
-
+#include "model_train_data.h"
 
 /* ====== */
 /* Variable declarations */
@@ -39,6 +38,7 @@ const int daylightOffset_sec = 0;
 void performWiFiScanning();
 void uploadData(int estimate);
 void reconnectToWifi();
+void testTrainingData();
 
 
 void setup() {
@@ -47,6 +47,8 @@ void setup() {
 
     Serial.println("------BEGIN------");
     pinMode(LED_BUILTIN, OUTPUT);
+
+    testTrainingData();
 
     // Connect to Wi-Fi
     WiFi.disconnect();
@@ -64,6 +66,7 @@ void setup() {
     Serial.println("Setting up NTP server for RTC");
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     waitForNTPSync();
+
 
     // Calculate the initial scan time
     nextScanTime = calculateNextScanTime(15);
@@ -256,3 +259,33 @@ void reconnectToWifi() {
     }
 }
 
+
+void testTrainingData() {
+    // Setup for model training data
+    // for each row in model training data, estimate the occupancy
+    float predictedOccupancy[numSamples];
+    float actualOccupancy[numSamples];
+
+    for (int i = 0; i < numSamples; i++) {
+        int groundTruth = wifiData[i].groundTruth;
+        int randomDevices = wifiData[i].random;
+        int validDevices = wifiData[i].valid;
+        int occupancyEstimate = estimateOccupancy(ModelType::REGRESSION, validDevices, randomDevices, wifiData[i].N_v, wifiData[i].N_r);
+        Serial.print("Estimate for row ");
+        Serial.print(i);
+        Serial.print(" = ");
+        Serial.println(occupancyEstimate);
+        predictedOccupancy[i] = occupancyEstimate;
+        actualOccupancy[i] = groundTruth;
+    }
+
+    float rmse = calculateRMSE(predictedOccupancy, actualOccupancy, numSamples);
+    float mae = calculateMAE(predictedOccupancy, actualOccupancy, numSamples);
+
+    Serial.print("RMSE = ");
+    Serial.println(rmse);
+    Serial.print("MAE = ");
+    Serial.println(mae);
+
+    delay(10000);
+}

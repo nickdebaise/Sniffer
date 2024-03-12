@@ -34,8 +34,6 @@ void WiFiSnifferPacketHandler(void* buff, wifi_promiscuous_pkt_type_t type) {
 
         std::string addrStr = macToString(hdr->addr2);
 
-        Serial.println(addrStr.c_str());
-
         if (isOUIValid(binOUI)) {
             // update valid RSSI counters
             if(uniqueDevices.find(addrStr) == uniqueDevices.end()) {
@@ -43,8 +41,6 @@ void WiFiSnifferPacketHandler(void* buff, wifi_promiscuous_pkt_type_t type) {
                     N_v[i]++;
                 }
 
-                Serial.print("FOUND VALID OUI: ");
-                Serial.println(ouiStr);
                 uniqueDevices.insert(addrStr);
             }
 
