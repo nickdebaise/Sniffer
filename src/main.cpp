@@ -48,7 +48,8 @@ void setup() {
     Serial.println("------BEGIN------");
     pinMode(LED_BUILTIN, OUTPUT);
 
-    testTrainingData();
+    // Test the training data for RMSE and MAE values
+    // testTrainingData();
 
     // Connect to Wi-Fi
     WiFi.disconnect();
@@ -71,7 +72,6 @@ void setup() {
     // Calculate the initial scan time
     nextScanTime = calculateNextScanTime(15);
 
-    // Setup for WiFi scanning
     Serial.println("Setting up WiFi Station");
 
     WiFi.mode(WIFI_STA);
@@ -143,16 +143,14 @@ void performWiFiScanning() {
     int currentChannelIndex = 0;
 
     esp_wifi_set_promiscuous(true);
-    esp_wifi_set_channel(channels[currentChannelIndex], WIFI_SECOND_CHAN_NONE); // Set initial channel
+    esp_wifi_set_channel(channels[currentChannelIndex], WIFI_SECOND_CHAN_NONE);
 
-    // Use millis() for non-blocking delay
     while (currentMillis - startMillis < wifiScanTime) {
         currentMillis = millis();
 
-        // Switch channel every channelSwitchInterval
         if (currentMillis - lastChannelSwitchTime >= channelSwitchInterval) {
             currentChannelIndex = (currentChannelIndex + 1) % 3; // Cycle through channels 1, 6, 11
-            WiFi.disconnect(); // ensure wifi stops operations on curr channel
+            WiFi.disconnect();
             esp_wifi_set_channel(channels[currentChannelIndex], WIFI_SECOND_CHAN_NONE);
             Serial.print("Switched to channel ");
             Serial.println(channels[currentChannelIndex]);
@@ -212,7 +210,7 @@ void uploadData(int estimate) {
             } else {
                 Serial.print("Error on sending POST: ");
                 Serial.println(httpResponseCode);
-                Serial.println(http.errorToString(httpResponseCode)); // Print error details if available
+                Serial.println(http.errorToString(httpResponseCode));
             }
             http.end();
         } else {
@@ -261,8 +259,6 @@ void reconnectToWifi() {
 
 
 void testTrainingData() {
-    // Setup for model training data
-    // for each row in model training data, estimate the occupancy
     float predictedOccupancy[numSamples];
     float actualOccupancy[numSamples];
 

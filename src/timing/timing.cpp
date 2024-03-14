@@ -10,7 +10,7 @@
  */
 void waitForNTPSync() {
     Serial.print("Waiting for time sync via pool.ntp.org");
-    while (time(nullptr) < 8 * 3600 * 2) {  // Wait until a reasonable time is set (at least 24 hours from epoch)
+    while (time(nullptr) < 8 * 3600 * 2) {
         Serial.print(".");
         delay(1000);
     }
@@ -31,22 +31,19 @@ unsigned long calculateNextScanTime(int step) {
     time(&now);
     localtime_r(&now, &timeinfo);
 
-    // Calculate minutes to the next step increment
     int minutesToNextStep = step - (timeinfo.tm_min % step);
-    if (minutesToNextStep == step) minutesToNextStep = 0;  // If we're exactly on a step, set to 0
+    if (minutesToNextStep == step) minutesToNextStep = 0;
 
-    // Calculate the next scan time
     timeinfo.tm_min += minutesToNextStep;
     timeinfo.tm_sec = 0;
 
-    // Convert back to epoch time and adjust for scanDuration
     time_t nextScanEpoch = mktime(&timeinfo);
 
 
     Serial.print("Next scan scheduled at: ");
     Serial.println(ctime(&nextScanEpoch));
 
-    return nextScanEpoch * 1000;  // Convert to milliseconds
+    return nextScanEpoch * 1000;
 }
 
 
@@ -61,7 +58,7 @@ void printFormattedTime() {
         return;
     }
 
-    char buffer[30];  // Make sure the buffer is large enough to hold the formatted string
+    char buffer[30];
     strftime(buffer, sizeof(buffer), "%m/%d/%Y %H:%M:%S", &timeinfo);
     Serial.print("Current time: ");
     Serial.println(buffer);
